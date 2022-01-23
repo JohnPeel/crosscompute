@@ -8,7 +8,7 @@ from invisibleroads_macros_disk import is_path_in_folder, make_folder
 from invisibleroads_macros_log import format_path
 from logging import getLogger
 from multiprocessing import Process, Queue, Value
-from os import environ, getenv, listdir
+from os import environ, getenv, listdir, name as os_name
 from os.path import exists, isdir, join, realpath
 from pyramid.config import Configurator
 from time import time
@@ -266,6 +266,10 @@ def run_automation(automation_definition, batch_definition):
     script_environment = {
         'CROSSCOMPUTE_' + k.upper(): v for k, v in mode_folder_by_name.items()
     } | {'PATH': getenv('PATH', '')} | custom_environment
+    if os_name == 'nt' and 'SYSTEMROOT' not in script_environment:
+        system_root = getenv('SYSTEMROOT')
+        if system_root:
+            script_environment['SYSTEMROOT'] = system_root
     L.debug('environment = %s', script_environment)
     debug_folder = mode_folder_by_name['debug_folder']
     o_path = join(debug_folder, 'stdout.txt')
